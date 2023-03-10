@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Flat's Hacker News Client</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f7f7f7;
+			margin: 0;
+			padding: 0;
+		}
+
+		h1 {
+			color: #ff6600;
+			margin: 20px 0;
+			text-align: center;
+		}
+
+		ul {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			background-color: #fff;
+			border: 1px solid #ddd;
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+
+		li a {
+			color: #333;
+			text-decoration: none;
+		}
+
+		li a:hover {
+			text-decoration: underline;
+		}
+
+		li button {
+			background-color: #ff6600;
+			border: none;
+			color: #fff;
+			cursor: pointer;
+			margin-left: 10px;
+			padding: 5px 10px;
+		}
+
+		li button:hover {
+			background-color: #ff5500;
+		}
+
+		li span {
+			color: #666;
+			font-size: 12px;
+			margin-left: 10px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Flat's Hacker News</h1>
+	<ul id="stories"></ul>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			$.getJSON('https://hacker-news.firebaseio.com/v0/topstories.json', function(topStories) {
+				topStories.slice(0, 30).forEach(function(storyID) {
+					$.getJSON('https://hacker-news.firebaseio.com/v0/item/' + storyID + '.json', function(story) {
+						var timeAgo = getTimeAgo(story.time);
+						var $li = $('<li><a href="' + story.url + '">' + story.title + '</a> by ' + story.by + '<span>(' + story.score + ' points, ' + timeAgo + ')</span> <button class="comments">View Comments</button></li>');
+						$li.find('.comments').on('click', function() {
+							window.open('https://news.ycombinator.com/item?id=' + storyID);
+						});
+						$('#stories').append($li);
+					});
+				});
+			});
+		});
+
+		function getTimeAgo(unixTimestamp) {
+			var now = new Date().getTime() / 1000;
+			var secondsAgo = now - unixTimestamp;
+			if (secondsAgo < 60) {
+				return Math.floor(secondsAgo) + ' seconds ago';
+			} else if (secondsAgo < 3600) {
+				return Math.floor(secondsAgo / 60) + ' minutes ago';
+			} else if (secondsAgo < 86400) {
+				return Math.floor(secondsAgo / 3600) + ' hours ago';
+			} else {
+				return Math.floor(secondsAgo / 86400) + ' days ago';
+			}
+		}
+	</script>
+</body>
+</html>
